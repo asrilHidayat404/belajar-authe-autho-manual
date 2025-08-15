@@ -2,17 +2,26 @@
 // action/AuthUser.ts
 import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
+import prisma from "@/lib/db";
 
 export async function AuthUser() {
     const token = (await cookies()).get("token")?.value;
     if (!token) return null;
-
-
     try {
 
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
-        return payload; // payload berisi { username, iat, exp }
+        if (!payload || typeof payload.username !== "string") return null;
+        const user = await prisma.user.findFirst({
+            where: {
+                username: payload?.username
+            },
+            include: {
+                role: true
+            }
+        })
+
+        return user; // payload berisi { username, iat, exp }
     } catch (err) {
         return null;
     }

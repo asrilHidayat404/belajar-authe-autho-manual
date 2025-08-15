@@ -1,4 +1,12 @@
 export type User = {
     username: string,
-    role: string
+    email: string,
+    password: string
+    role_id: number
+    role?: Role
+}
+
+export type Role = {
+    id_role: number,
+    role_name: string
 }

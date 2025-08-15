@@ -1,9 +1,11 @@
 "use client";
 import { useFlash } from "@/context/FlashContext";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export default function LogoutButton() {
     const { showFlash } = useFlash()
+    const router = useRouter()
     const handleLogout = async () => {
         try {
             const res = await axios.post("/api/logout");
@@ -11,7 +13,7 @@ export default function LogoutButton() {
             showFlash({ message: data.message, type: "success" });
 
             // redirect ke halaman login
-            setTimeout(() => window.location.href = "/login", 100);
+            router.push("/login")
         } catch (err) {
             console.error("Logout gagal", err);
         }

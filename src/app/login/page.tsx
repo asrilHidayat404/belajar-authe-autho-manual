@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useFlash } from "@/context/FlashContext";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const [username, setUsername] = useState("");
@@ -11,6 +12,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const router = useRouter()
     const { showFlash } = useFlash()
 
 
@@ -39,8 +41,7 @@ export default function LoginPage() {
             showFlash({ message: data.message, type: "success" });
 
             // redirect ke dashboard
-            setTimeout(() => window.location.href = "/dashboard", 100);
-
+            router.push("/dashboard");
         } catch (err: any) {
             // jika login gagal
             const message = err.response?.data?.message || "Login gagal, periksa kredensial.";
