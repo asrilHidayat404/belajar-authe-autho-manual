@@ -40,16 +40,13 @@ export async function POST(req: NextRequest) {
         maxAge: 60 * 60
     });
 
-    const flashCookie = serialize("flash", JSON.stringify({ message: "Login berhasil!", type: "success" }), {
-        path: "/",
-        maxAge: 5, // hanya 5 detik
-    });
-    const headers = new Headers();
-    headers.append("Set-Cookie", cookie);
-    headers.append("Set-Cookie", flashCookie);
 
-    return new Response(JSON.stringify({ message: "Login Success" }), {
-        status: 200,
-        headers
-    });
+
+    return new Response(
+        JSON.stringify({ message: "Login berhasil!", type: "success" }),
+        {
+            status: 200,
+            headers: { "Set-Cookie": cookie },
+        }
+    );
 }

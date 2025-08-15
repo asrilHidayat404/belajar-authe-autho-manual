@@ -3,12 +3,15 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useFlash } from "@/context/FlashContext";
 
 export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    const { showFlash } = useFlash()
 
 
 
@@ -30,9 +33,19 @@ export default function LoginPage() {
                 password,
             });
 
-            window.location.href = "/dashboard";
+            const data = res.data;
+
+            // tampilkan flash
+            showFlash({ message: data.message, type: "success" });
+
+            // redirect ke dashboard
+            setTimeout(() => window.location.href = "/dashboard", 100);
+
         } catch (err: any) {
-            setError(err.response?.data?.message || "Login gagal, periksa kredensial.");
+            // jika login gagal
+            const message = err.response?.data?.message || "Login gagal, periksa kredensial.";
+            setError(message);
+            showFlash({ message, type: "error" });
         } finally {
             setLoading(false);
         }
