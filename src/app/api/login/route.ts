@@ -11,7 +11,10 @@ export async function POST(req: NextRequest) {
 
     const { username, password } = await req.json();
     const userDb = await prisma.user.findFirst({
-        where: { username }
+        where: { username },
+        include: {
+            role: true
+        }
     });
 
     console.log({ username, password });
@@ -29,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // buat token
-    const token = jwt.sign({ username }, secret, { expiresIn: "1h" });
+    const token = jwt.sign({ username: userDb.username, role: userDb.role.role_name }, secret, { expiresIn: "1h" });
 
     // simpan di cookei
     const cookie = serialize("token", token, {
