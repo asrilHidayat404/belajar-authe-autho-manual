@@ -40,13 +40,13 @@ var PrismaClient = require("../src/generated/prisma").PrismaClient; // path rela
 var prisma = new PrismaClient();
 function main() {
     return __awaiter(this, void 0, void 0, function () {
-        var roles, _i, roles_1, role_name, users, _a, users_1, u, role, hashedPassword, posts, _b, posts_1, p, user;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
+        var roles, _i, roles_1, role_name, users, _a, users_1, u, role, hashedPassword;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    roles = ["Admin", "Mahasiswa"];
+                    roles = ["Admin", "Reviewer", "Keuangan", "Mahasiswa"];
                     _i = 0, roles_1 = roles;
-                    _c.label = 1;
+                    _b.label = 1;
                 case 1:
                     if (!(_i < roles_1.length)) return [3 /*break*/, 4];
                     role_name = roles_1[_i];
@@ -56,79 +56,50 @@ function main() {
                             create: { role_name: role_name },
                         })];
                 case 2:
-                    _c.sent();
-                    _c.label = 3;
+                    _b.sent();
+                    _b.label = 3;
                 case 3:
                     _i++;
                     return [3 /*break*/, 1];
                 case 4:
                     console.log("Roles seeded!");
                     users = [
-                        { username: "Alice", email: "alice@gmail.com", role_name: "Mahasiswa" },
-                        { username: "Admin", email: "admin@gmail.com", role_name: "Admin" },
+                        { full_name: "Admin", email: "admin@gmail.com", role_name: "Admin" },
+                        { full_name: "Sephoni", email: "sephoni@gmail.com", role_name: "Reviewer" },
+                        { full_name: "Cate", email: "cate@gmail.com", role_name: "Keuangan" },
+                        { full_name: "Alice", email: "alice@gmail.com", role_name: "Mahasiswa" },
                     ];
                     _a = 0, users_1 = users;
-                    _c.label = 5;
+                    _b.label = 5;
                 case 5:
                     if (!(_a < users_1.length)) return [3 /*break*/, 10];
                     u = users_1[_a];
                     return [4 /*yield*/, prisma.role.findUnique({ where: { role_name: u.role_name } })];
                 case 6:
-                    role = _c.sent();
+                    role = _b.sent();
                     if (!role)
                         throw new Error("Role ".concat(u.role_name, " not found"));
                     return [4 /*yield*/, bcrypt.hash("password", 10)];
                 case 7:
-                    hashedPassword = _c.sent();
+                    hashedPassword = _b.sent();
                     return [4 /*yield*/, prisma.user.upsert({
                             where: { email: u.email },
                             update: {},
                             create: {
-                                username: u.username,
+                                full_name: u.full_name,
                                 email: u.email,
                                 password: hashedPassword,
                                 role_id: role.id_role,
                             },
                         })];
                 case 8:
-                    _c.sent();
-                    _c.label = 9;
+                    _b.sent();
+                    _b.label = 9;
                 case 9:
                     _a++;
                     return [3 /*break*/, 5];
                 case 10:
                     console.log("Users seeded!");
-                    posts = [
-                        { title: "Post 1", content: "Konten Post 1", user_email: "alice@gmail.com" },
-                        { title: "Post 2", content: "Konten Post 2", user_email: "admin@gmail.com" },
-                    ];
-                    _b = 0, posts_1 = posts;
-                    _c.label = 11;
-                case 11:
-                    if (!(_b < posts_1.length)) return [3 /*break*/, 15];
-                    p = posts_1[_b];
-                    return [4 /*yield*/, prisma.user.findUnique({ where: { email: p.user_email } })];
-                case 12:
-                    user = _c.sent();
-                    if (!user)
-                        throw new Error("User ".concat(p.user_email, " not found"));
-                    return [4 /*yield*/, prisma.post.upsert({
-                            where: { title: p.title },
-                            update: {},
-                            create: {
-                                title: p.title,
-                                content: p.content,
-                                user_id: user.id_user,
-                            },
-                        })];
-                case 13:
-                    _c.sent();
-                    _c.label = 14;
-                case 14:
-                    _b++;
-                    return [3 /*break*/, 11];
-                case 15:
-                    console.log("Posts seeded!");
                     return [2 /*return*/];
             }
         });

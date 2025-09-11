@@ -8,13 +8,12 @@ export async function AuthUser() {
     const token = (await cookies()).get("token")?.value;
     if (!token) return null;
     try {
-
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
-        if (!payload || typeof payload.username !== "string") return null;
-        const user = await prisma.user.findFirst({
+        if (!payload || typeof payload.id !== "number") return null;
+        const user = await prisma.user.findUnique({
             where: {
-                username: payload?.username
+                id_user: payload.id
             },
             include: {
                 role: true

@@ -14,32 +14,143 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id_user    Int      @id @default(autoincrement())
-  email      String   @unique
-  username   String
-  password   String
-  role_id    Int
-  role       Role     @relation(fields: [role_id], references: [id_role])
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  Post       Post[]
+enum ProposalReviewerStatus {
+  Pending // Pending
+  In_Review // Sedang Direview
+  Revision // Revisi
+  Rejected // Ditolak
+  Approved // Disetujui
+  Revised // Sudah Direvisi
+}
+
+enum OrmawaMemberRole {
+  Chairperson // Ketua
+  Secretary // Sekretaris
+  Treasurer // Bendahara
+  Member // Anggota
 }
 
 model Role {
-  id_role    Int      @id @default(autoincrement())
-  role_name  String   @unique
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  User       User[]
+  id_role   Int    @id @default(autoincrement())
+  role_name String
+  users     User[]
 }
 
-model Post {
-  id_post    Int      @id @default(autoincrement())
-  title      String   @unique
-  content    String
-  user_id    Int
-  user       User     @relation(fields: [user_id], references: [id_user])
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+model User {
+  id_user           Int            @id @default(autoincrement())
+  nim               String?        @unique
+  full_name         String
+  faculty           String?
+  field_of_study    String?
+  class             String?
+  gender            String?
+  semester          String?
+  email             String         @unique
+  avatar            String?
+  role_id           Int
+  role              Role           @relation(fields: [role_id], references: [id_role], onDelete: Cascade)
+  password          String?
+  proposals         Proposal[]     @relation("UserProposals")
+  reviews           Proposal[]     @relation("ReviewerProposals")
+  reports           Report[]
+  ormawaMemberships OrmawaMember[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model Theme {
+  id_theme   Int        @id @default(autoincrement())
+  theme_name String
+  proposals  Proposal[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Category {
+  id_category   Int        @id @default(autoincrement())
+  category_name String
+  proposals     Proposal[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Ormawa {
+  id_ormawa   Int            @id @default(autoincrement())
+  ormawa_name String
+  description String?
+  logo_path   String?
+  members     OrmawaMember[]
+  proposals   Proposal[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model OrmawaMember {
+  id_ormawa_member Int              @id @default(autoincrement())
+  ormawa_id        Int
+  user_id          Int
+  role             OrmawaMemberRole @default(Member)
+  ormawa           Ormawa           @relation(fields: [ormawa_id], references: [id_ormawa])
+  user             User             @relation(fields: [user_id], references: [id_user])
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Proposal {
+  id_proposal         Int                    @id @default(autoincrement())
+  title               String
+  user_id             Int?
+  ormawa_id           Int?
+  reviewer_id         Int?
+  category_id         Int?
+  theme_id            Int?
+  reviewer_status     ProposalReviewerStatus @default(Pending)
+  review_note         String?
+  payment_status      Boolean                @default(false)
+  payment_note        String?
+  payment_verified_at DateTime?
+  proposal_file_path  String
+  rab_file_path       String
+  user                User?                  @relation("UserProposals", fields: [user_id], references: [id_user], onDelete: SetNull)
+  reviewer            User?                  @relation("ReviewerProposals", fields: [reviewer_id], references: [id_user])
+  category            Category?              @relation(fields: [category_id], references: [id_category], onDelete: Cascade)
+  theme               Theme?                 @relation(fields: [theme_id], references: [id_theme], onDelete: Cascade)
+  ormawa              Ormawa?                @relation(fields: [ormawa_id], references: [id_ormawa], onDelete: SetNull)
+  reports             Report[]
+  documentations      Documentation[]
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+}
+
+model Report {
+  id_report        Int      @id @default(autoincrement())
+  title            String
+  user_id          Int
+  proposal_id      Int
+  report_file_path String
+  user             User     @relation(fields: [user_id], references: [id_user], onDelete: Cascade)
+  proposal         Proposal @relation(fields: [proposal_id], references: [id_proposal], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Documentation {
+  id_documentation Int                  @id @default(autoincrement())
+  proposal_id      Int
+  description      String?
+  proposal         Proposal             @relation(fields: [proposal_id], references: [id_proposal], onDelete: Cascade)
+  images           DocumentationImage[]
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+}
+
+model DocumentationImage {
+  id               Int           @id @default(autoincrement())
+  documentation_id Int
+  file_path        String
+  caption          String?
+  order            Int           @default(0)
+  documentation    Documentation @relation(fields: [documentation_id], references: [id_documentation], onDelete: Cascade)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 }

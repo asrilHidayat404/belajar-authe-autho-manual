@@ -42,6 +42,9 @@ export async function middleware(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
     const pathname = req.nextUrl.pathname;
 
+    // if (pathname === "/") {
+    //     return NextResponse.redirect(new URL("/login", req.url));
+    // }
     // Redirect ke dashboard kalau sudah login
     if (pathname === "/login" && token) {
         return NextResponse.redirect(new URL("/dashboard", req.url));
@@ -56,8 +59,10 @@ export async function middleware(req: NextRequest) {
     if (token) {
         const secret = new TextEncoder().encode(process.env.JWT_SECRET);
         const { payload } = await jwtVerify(token, secret);
+        console.log(payload);
 
-        if (!payload || typeof payload.username !== "string" || !payload.role) {
+
+        if (!payload || typeof payload.email !== "string" || !payload.role) {
             return NextResponse.redirect(new URL("/login", req.url));
         }
 
@@ -77,7 +82,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/login", "/dashboard/:path*"],
+    matcher: ["/", "/login", "/dashboard/:path*"],
 };
 
 

@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 async function main() {
     // ===== 1. Seed Roles =====
-    const roles = ["Admin", "Mahasiswa"];
+    const roles = ["Admin", "Reviewer", "Keuangan", "Mahasiswa"];
     for (const role_name of roles) {
         await prisma.role.upsert({
             where: { role_name },
@@ -16,8 +16,10 @@ async function main() {
 
     // ===== 2. Seed Users =====
     const users = [
-        { username: "Alice", email: "alice@gmail.com", role_name: "Mahasiswa" },
-        { username: "Admin", email: "admin@gmail.com", role_name: "Admin" },
+        { full_name: "Admin", email: "admin@gmail.com", role_name: "Admin" },
+        { full_name: "Sephoni", email: "sephoni@gmail.com", role_name: "Reviewer" },
+        { full_name: "Cate", email: "cate@gmail.com", role_name: "Keuangan" },
+        { full_name: "Alice", email: "alice@gmail.com", role_name: "Mahasiswa" },
     ];
 
     for (const u of users) {
@@ -30,7 +32,7 @@ async function main() {
             where: { email: u.email },
             update: {},
             create: {
-                username: u.username,
+                full_name: u.full_name,
                 email: u.email,
                 password: hashedPassword,
                 role_id: role.id_role,
@@ -39,27 +41,6 @@ async function main() {
     }
     console.log("Users seeded!");
 
-    // ===== 3. Seed Posts =====
-    const posts = [
-        { title: "Post 1", content: "Konten Post 1", user_email: "alice@gmail.com" },
-        { title: "Post 2", content: "Konten Post 2", user_email: "admin@gmail.com" },
-    ];
-
-    for (const p of posts) {
-        const user = await prisma.user.findUnique({ where: { email: p.user_email } });
-        if (!user) throw new Error(`User ${p.user_email} not found`);
-
-        await prisma.post.upsert({
-            where: { title: p.title },
-            update: {},
-            create: {
-                title: p.title,
-                content: p.content,
-                user_id: user.id_user,
-            },
-        });
-    }
-    console.log("Posts seeded!");
 }
 
 // ===== Run Seeder =====
